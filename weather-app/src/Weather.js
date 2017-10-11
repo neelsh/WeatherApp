@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './Weather.css';
 import xhr from 'xhr';
 import Plot from './Plot';
@@ -8,7 +8,7 @@ class Weather extends React.Component {
     location: '',
     data: {},
     dates: [],
-    temps: []
+    temps: [],
   };
 
   fetchData = (evt) => {
@@ -35,7 +35,7 @@ class Weather extends React.Component {
         self.setState({
           data: body,
           dates: dates,
-          temps: temps
+          temps: temps,
         })
     });
   };
@@ -51,42 +51,51 @@ class Weather extends React.Component {
     if(this.state.data.list) {
       currentTemp = this.state.data.list[0].main.temp;
     }
+    let currentCondition = 'condition not loaded yet';
+    if(this.state.data.list) {
+      currentCondition = this.state.data.list[0].weather[0].main;
+    }
+    let currentSuggestion = 'No suggestion yet...';
+    if(currentCondition.indexOf('Rain')>=0) {
+      currentSuggestion = 'Pack an umbrella...'
+    } else {
+      currentSuggestion = 'No need to pack an umbrella today!'
+    }
     return (
       <div>
-        <h1>Weather</h1>
-        <form onSubmit={this.fetchData}>
-          <label>I want to know the weather for
-            <input className="focus" placeholder=":focus" placeholder={"City, Country"}
-              type="text"
-              value={this.state.location}
-              onChange={this.changeLocation}
-            />
-          </label>
-        </form>
+        <div className="current">
+          <h1 className="weather">Weather</h1>
+          <form onSubmit={this.fetchData}>
+            <h3>I want to know the weather for
+              <button className="focus" placeholder=":focus"
+                value={this.state.location}
+                onChange={this.changeLocation}>London</button>
+            </h3>
+          </form>
+        </div>
         {(this.state.data.list) ? (
           <div className="wrapper">
             <p className="temp-wrapper">
+            Current Temperature:
             <span className="temp">{ currentTemp }</span>
             <span className="temp-symbol">°C</span>
             </p>
-            <h2>Forecast</h2>
+            <p className="cond-wrapper">
+            Current Condition:
+            <span className="condition">{ currentCondition }</span>
+            </p>
+            <p className="suggest-wrapper">
+            Suggestion:
+            <span className="suggestion">{ currentSuggestion }</span>
+            </p>
+            <h2 className="forecast">Forecast for the next 4 days</h2>
               <Plot
                 xData={this.state.dates}
                 yData={this.state.temps}
                 type="scatter"
               />
-            </div>
-          ) : null }
-        <p className="temp-wrapper">
-          <span className="temp">{ currentTemp }</span>
-          <span className="temp-symbol">°C</span>
-        </p>
-        <h2>Forecast</h2>
-          <Plot
-            xData={this.state.dates}
-            yData={this.state.temps}
-            type="scatter"
-          />
+          </div>
+        ) : null }
       </div>
     )
   }
